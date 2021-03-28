@@ -24,45 +24,48 @@ Data Stack size         : 512
 #include <mega32.h>
 #include <delay.h>
 // Declare your global variables here
-
+float buttons(float);
 void main(void)
 {
+float f = 0.01;
 DDRA = 0x00;
 PORTA = 0xFF;
 DDRC = 0xFF;
 PORTC = 0x00;
+
 while (1)
       {
       if(PINA.0==0){
           while(1){ 
           //100HZ
               PORTC = 0b00000000;   
-              delay_ms(0.01);    
+              delay_ms(f);    
               PORTC = 0b00000001; 
-              delay_ms(0.01);
-              //250HZ
-              if(PINA.2==0){
-                 PORTC = 0b00000000;   
-                 delay_ms(500);    
-                 PORTC = 0b00000001; 
-                 delay_ms(500);
-              }      
-              //500Hz
-              if(PINA.3==0){
-                 PORTC = 0b00000000;   
-                 delay_ms(500);    
-                 PORTC = 0b00000001; 
-                 delay_ms(500);
-              }      
-              //1000Hz
-              if(PINA.4==0){
-                 PORTC = 0b00000000;   
-                 delay_ms(500);    
-                 PORTC = 0b00000001; 
-                 delay_ms(500);
-              }
+              delay_ms(f);  
+              f = buttons(f);
           } 
       }
 
       }
+}
+float buttons(float f0){
+    //250HZ
+     if(PINA.2==0){
+     return 500;
+     }              
+     //500Hz
+     if(PINA.3==0){
+     return 0.002;
+     }     
+     //1000Hz
+     if(PINA.4==0){
+     return 0.001;
+     }   
+     //100HZ
+     if(PINA.1==0){
+     return 0.01;
+     }
+     else{
+     return f0;
+     }
 }

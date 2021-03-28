@@ -1199,88 +1199,126 @@ __CLEAR_SRAM:
 	#endif
 ;#include <delay.h>
 ;// Declare your global variables here
-;
+;float buttons(float);
 ;void main(void)
 ; 0000 001D {
 
 	.CSEG
 _main:
 ; .FSTART _main
-; 0000 001E DDRA = 0x00;
+; 0000 001E float f = 0.01;
+; 0000 001F DDRA = 0x00;
+	SBIW R28,4
+	LDI  R30,LOW(10)
+	ST   Y,R30
+	LDI  R30,LOW(215)
+	STD  Y+1,R30
+	LDI  R30,LOW(35)
+	STD  Y+2,R30
+	LDI  R30,LOW(60)
+	STD  Y+3,R30
+;	f -> Y+0
 	LDI  R30,LOW(0)
 	OUT  0x1A,R30
-; 0000 001F PORTA = 0xFF;
+; 0000 0020 PORTA = 0xFF;
 	LDI  R30,LOW(255)
 	OUT  0x1B,R30
-; 0000 0020 DDRC = 0xFF;
+; 0000 0021 DDRC = 0xFF;
 	OUT  0x14,R30
-; 0000 0021 PORTC = 0x00;
+; 0000 0022 PORTC = 0x00;
 	LDI  R30,LOW(0)
 	OUT  0x15,R30
-; 0000 0022 while (1)
+; 0000 0023 
+; 0000 0024 while (1)
 _0x3:
-; 0000 0023       {
-; 0000 0024       if(PINA.0==0){
+; 0000 0025       {
+; 0000 0026       if(PINA.0==0){
 	SBIC 0x19,0
 	RJMP _0x6
-; 0000 0025           while(1){
+; 0000 0027           while(1){
 _0x7:
-; 0000 0026           //100HZ
-; 0000 0027               PORTC = 0b00000000;
+; 0000 0028           //100HZ
+; 0000 0029               PORTC = 0b00000000;
+	LDI  R30,LOW(0)
 	RCALL SUBOPT_0x0
-; 0000 0028               delay_ms(0.01);
-; 0000 0029               PORTC = 0b00000001;
-; 0000 002A               delay_ms(0.01);
-; 0000 002B               //250HZ
-; 0000 002C               if(PINA.2==0){
-	SBIS 0x19,2
-; 0000 002D                  PORTC = 0b00000000;
+; 0000 002A               delay_ms(f);
+; 0000 002B               PORTC = 0b00000001;
+	LDI  R30,LOW(1)
 	RCALL SUBOPT_0x0
-; 0000 002E                  delay_ms(0.004);
-; 0000 002F                  PORTC = 0b00000001;
-; 0000 0030                  delay_ms(0.004);
-; 0000 0031               }
-; 0000 0032               //500Hz
-; 0000 0033               if(PINA.3==0){
-	SBIS 0x19,3
-; 0000 0034                  PORTC = 0b00000000;
-	RCALL SUBOPT_0x0
-; 0000 0035                  delay_ms(0.002);
-; 0000 0036                  PORTC = 0b00000001;
-; 0000 0037                  delay_ms(0.002);
-; 0000 0038               }
-; 0000 0039               //1000Hz
-; 0000 003A               if(PINA.4==0){
-	SBIS 0x19,4
-; 0000 003B                  PORTC = 0b00000000;
-	RCALL SUBOPT_0x0
-; 0000 003C                  delay_ms(0.001);
-; 0000 003D                  PORTC = 0b00000001;
-; 0000 003E                  delay_ms(0.001);
-; 0000 003F               }
-; 0000 0040           }
+; 0000 002C               delay_ms(f);
+; 0000 002D               f = buttons(f);
+	CALL __GETD2S0
+	RCALL _buttons
+	CALL __PUTD1S0
+; 0000 002E           }
 	RJMP _0x7
-; 0000 0041       }
-; 0000 0042 
-; 0000 0043       }
+; 0000 002F       }
+; 0000 0030 
+; 0000 0031       }
 _0x6:
 	RJMP _0x3
-; 0000 0044 }
-_0xD:
+; 0000 0032 }
+_0xA:
+	RJMP _0xA
+; .FEND
+;float buttons(float f0){
+; 0000 0033 float buttons(float f0){
+_buttons:
+; .FSTART _buttons
+; 0000 0034     //250HZ
+; 0000 0035      if(PINA.2==0){
+	CALL __PUTPARD2
+;	f0 -> Y+0
+	SBIC 0x19,2
+	RJMP _0xB
+; 0000 0036      return 0.004;
+	__GETD1N 0x3B83126F
+	RJMP _0x2000001
+; 0000 0037      }
+; 0000 0038      //500Hz
+; 0000 0039      if(PINA.3==0){
+_0xB:
+	SBIC 0x19,3
+	RJMP _0xC
+; 0000 003A      return 0.002;
+	__GETD1N 0x3B03126F
+	RJMP _0x2000001
+; 0000 003B      }
+; 0000 003C      //1000Hz
+; 0000 003D      if(PINA.4==0){
+_0xC:
+	SBIC 0x19,4
 	RJMP _0xD
+; 0000 003E      return 0.001;
+	__GETD1N 0x3A83126F
+	RJMP _0x2000001
+; 0000 003F      }
+; 0000 0040      //100HZ
+; 0000 0041      if(PINA.1==0){
+_0xD:
+	SBIC 0x19,1
+	RJMP _0xE
+; 0000 0042      return 0.01;
+	__GETD1N 0x3C23D70A
+	RJMP _0x2000001
+; 0000 0043      }
+; 0000 0044      else{
+_0xE:
+; 0000 0045      return f0;
+	CALL __GETD1S0
+; 0000 0046      }
+; 0000 0047 }
+_0x2000001:
+	ADIW R28,4
+	RET
 ; .FEND
 
 	.CSEG
-;OPTIMIZER ADDED SUBROUTINE, CALLED 4 TIMES, CODE SIZE REDUCTION:45 WORDS
+;OPTIMIZER ADDED SUBROUTINE, CALLED 2 TIMES, CODE SIZE REDUCTION:5 WORDS
 SUBOPT_0x0:
-	LDI  R30,LOW(0)
 	OUT  0x15,R30
-	__GETD1N 0x0
-	MOVW R26,R30
-	CALL _delay_ms
-	LDI  R30,LOW(1)
-	OUT  0x15,R30
-	__GETD1N 0x0
+	CALL __GETD1S0
+	CALL __CFD1U
 	MOVW R26,R30
 	JMP  _delay_ms
 
@@ -1296,6 +1334,132 @@ __delay_ms0:
 	brne __delay_ms0
 __delay_ms1:
 	ret
+
+__UNPACK1:
+	LDI  R21,0x80
+	MOV  R0,R23
+	AND  R0,R21
+	LSL  R22
+	ROL  R23
+	EOR  R23,R21
+	LSL  R21
+	ROR  R22
+	RET
+
+__CFD1U:
+	SET
+	RJMP __CFD1U0
+__CFD1:
+	CLT
+__CFD1U0:
+	PUSH R21
+	RCALL __UNPACK1
+	CPI  R23,0x80
+	BRLO __CFD10
+	CPI  R23,0xFF
+	BRCC __CFD10
+	RJMP __ZERORES
+__CFD10:
+	LDI  R21,22
+	SUB  R21,R23
+	BRPL __CFD11
+	NEG  R21
+	CPI  R21,8
+	BRTC __CFD19
+	CPI  R21,9
+__CFD19:
+	BRLO __CFD17
+	SER  R30
+	SER  R31
+	SER  R22
+	LDI  R23,0x7F
+	BLD  R23,7
+	RJMP __CFD15
+__CFD17:
+	CLR  R23
+	TST  R21
+	BREQ __CFD15
+__CFD18:
+	LSL  R30
+	ROL  R31
+	ROL  R22
+	ROL  R23
+	DEC  R21
+	BRNE __CFD18
+	RJMP __CFD15
+__CFD11:
+	CLR  R23
+__CFD12:
+	CPI  R21,8
+	BRLO __CFD13
+	MOV  R30,R31
+	MOV  R31,R22
+	MOV  R22,R23
+	SUBI R21,8
+	RJMP __CFD12
+__CFD13:
+	TST  R21
+	BREQ __CFD15
+__CFD14:
+	LSR  R23
+	ROR  R22
+	ROR  R31
+	ROR  R30
+	DEC  R21
+	BRNE __CFD14
+__CFD15:
+	TST  R0
+	BRPL __CFD16
+	RCALL __ANEGD1
+__CFD16:
+	POP  R21
+	RET
+
+__ZERORES:
+	CLR  R30
+	CLR  R31
+	CLR  R22
+	CLR  R23
+	POP  R21
+	RET
+
+__ANEGD1:
+	COM  R31
+	COM  R22
+	COM  R23
+	NEG  R30
+	SBCI R31,-1
+	SBCI R22,-1
+	SBCI R23,-1
+	RET
+
+__GETD1S0:
+	LD   R30,Y
+	LDD  R31,Y+1
+	LDD  R22,Y+2
+	LDD  R23,Y+3
+	RET
+
+__GETD2S0:
+	LD   R26,Y
+	LDD  R27,Y+1
+	LDD  R24,Y+2
+	LDD  R25,Y+3
+	RET
+
+__PUTD1S0:
+	ST   Y,R30
+	STD  Y+1,R31
+	STD  Y+2,R22
+	STD  Y+3,R23
+	RET
+
+__PUTPARD2:
+	ST   -Y,R25
+	ST   -Y,R24
+	ST   -Y,R27
+	ST   -Y,R26
+	RET
 
 ;END OF CODE MARKER
 __END_OF_CODE:
