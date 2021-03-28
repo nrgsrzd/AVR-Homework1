@@ -1,5 +1,5 @@
-VERSION:3 SOURCE_TIMESTAMP:527C651C
-NODE:I LEVEL:0 LINE:24 "C:\cvavr\inc\mega32.h"
-NODE:I LEVEL:0 LINE:25 "C:\cvavr\inc\delay.h"
-NODE:F LEVEL:0 LINE:28 "main(void)"
-NODE:F LEVEL:0 LINE:51 "buttons(float f0)"
+VERSION:3 SOURCE_TIMESTAMP:527CA393
+NODE:I LEVEL:0 LINE:23 "C:\cvavr\inc\mega32.h"
+NODE:I LEVEL:0 LINE:24 "C:\cvavr\inc\delay.h"
+NODE:F LEVEL:0 LINE:27 "main(void)"
+NODE:F LEVEL:0 LINE:59 "buttons(float f0)"

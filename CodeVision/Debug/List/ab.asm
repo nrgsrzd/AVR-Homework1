@@ -1176,7 +1176,6 @@ __CLEAR_SRAM:
 ;Company :
 ;Comments:
 ;
-;
 ;Chip type               : ATmega32
 ;Program type            : Application
 ;AVR Core Clock frequency: 1.000000 MHz
@@ -1201,23 +1200,25 @@ __CLEAR_SRAM:
 ;// Declare your global variables here
 ;float buttons(float);
 ;void main(void)
-; 0000 001D {
+; 0000 001C {
 
 	.CSEG
 _main:
 ; .FSTART _main
-; 0000 001E float f = 0.01;
+; 0000 001D float f = 0.01;
+; 0000 001E float ftemp;
 ; 0000 001F DDRA = 0x00;
-	SBIW R28,4
+	SBIW R28,8
 	LDI  R30,LOW(10)
-	ST   Y,R30
+	STD  Y+4,R30
 	LDI  R30,LOW(215)
-	STD  Y+1,R30
+	STD  Y+5,R30
 	LDI  R30,LOW(35)
-	STD  Y+2,R30
+	STD  Y+6,R30
 	LDI  R30,LOW(60)
-	STD  Y+3,R30
-;	f -> Y+0
+	STD  Y+7,R30
+;	f -> Y+4
+;	ftemp -> Y+0
 	LDI  R30,LOW(0)
 	OUT  0x1A,R30
 ; 0000 0020 PORTA = 0xFF;
@@ -1229,95 +1230,118 @@ _main:
 	LDI  R30,LOW(0)
 	OUT  0x15,R30
 ; 0000 0023 
-; 0000 0024 while (1)
+; 0000 0024 f = buttons(f);
+	RCALL SUBOPT_0x0
+	__PUTD1S 4
+; 0000 0025 
+; 0000 0026 while (1)
 _0x3:
-; 0000 0025       {
-; 0000 0026       if(PINA.0==0){
+; 0000 0027       {
+; 0000 0028 
+; 0000 0029       //start
+; 0000 002A       if(PINA.0==0){
 	SBIC 0x19,0
 	RJMP _0x6
-; 0000 0027           while(1){
+; 0000 002B           while(1){
 _0x7:
-; 0000 0028           //100HZ
-; 0000 0029               PORTC = 0b00000000;
+; 0000 002C           //100HZ
+; 0000 002D               PORTC = 0b00000000;
 	LDI  R30,LOW(0)
-	RCALL SUBOPT_0x0
-; 0000 002A               delay_ms(f);
-; 0000 002B               PORTC = 0b00000001;
+	RCALL SUBOPT_0x1
+; 0000 002E               delay_ms(f);
+; 0000 002F               PORTC = 0b00000001;
 	LDI  R30,LOW(1)
+	RCALL SUBOPT_0x1
+; 0000 0030               delay_ms(f);
+; 0000 0031               ftemp = buttons(f);
 	RCALL SUBOPT_0x0
-; 0000 002C               delay_ms(f);
-; 0000 002D               f = buttons(f);
-	CALL __GETD2S0
-	RCALL _buttons
 	CALL __PUTD1S0
-; 0000 002E           }
+; 0000 0032               if(ftemp != f){
+	__GETD1S 4
+	CALL __GETD2S0
+	CALL __CPD12
+	BREQ _0xA
+; 0000 0033                 f = ftemp;
+	CALL __GETD1S0
+	__PUTD1S 4
+; 0000 0034                 break;
+	RJMP _0x9
+; 0000 0035               }
+; 0000 0036           }
+_0xA:
 	RJMP _0x7
-; 0000 002F       }
-; 0000 0030 
-; 0000 0031       }
+_0x9:
+; 0000 0037       }
+; 0000 0038 
+; 0000 0039       }
 _0x6:
 	RJMP _0x3
-; 0000 0032 }
-_0xA:
-	RJMP _0xA
+; 0000 003A }
+_0xB:
+	RJMP _0xB
 ; .FEND
 ;float buttons(float f0){
-; 0000 0033 float buttons(float f0){
+; 0000 003B float buttons(float f0){
 _buttons:
 ; .FSTART _buttons
-; 0000 0034     //250HZ
-; 0000 0035      if(PINA.2==0){
+; 0000 003C     //250HZ
+; 0000 003D      if(PINA.2==0){
 	CALL __PUTPARD2
 ;	f0 -> Y+0
 	SBIC 0x19,2
-	RJMP _0xB
-; 0000 0036      return 0.004;
-	__GETD1N 0x3B83126F
-	RJMP _0x2000001
-; 0000 0037      }
-; 0000 0038      //500Hz
-; 0000 0039      if(PINA.3==0){
-_0xB:
-	SBIC 0x19,3
 	RJMP _0xC
-; 0000 003A      return 0.002;
-	__GETD1N 0x3B03126F
-	RJMP _0x2000001
-; 0000 003B      }
-; 0000 003C      //1000Hz
-; 0000 003D      if(PINA.4==0){
-_0xC:
-	SBIC 0x19,4
-	RJMP _0xD
-; 0000 003E      return 0.001;
-	__GETD1N 0x3A83126F
+; 0000 003E      return 2;
+	__GETD1N 0x40000000
 	RJMP _0x2000001
 ; 0000 003F      }
-; 0000 0040      //100HZ
-; 0000 0041      if(PINA.1==0){
-_0xD:
-	SBIC 0x19,1
-	RJMP _0xE
-; 0000 0042      return 0.01;
-	__GETD1N 0x3C23D70A
+; 0000 0040      //500Hz
+; 0000 0041      if(PINA.3==0){
+_0xC:
+	SBIC 0x19,3
+	RJMP _0xD
+; 0000 0042      return 1;
+	__GETD1N 0x3F800000
 	RJMP _0x2000001
 ; 0000 0043      }
-; 0000 0044      else{
+; 0000 0044      //1000Hz
+; 0000 0045      if(PINA.4==0){
+_0xD:
+	SBIC 0x19,4
+	RJMP _0xE
+; 0000 0046      return 0.5;
+	__GETD1N 0x3F000000
+	RJMP _0x2000001
+; 0000 0047      }
+; 0000 0048      //100HZ
+; 0000 0049      if(PINA.1==0){
 _0xE:
-; 0000 0045      return f0;
+	SBIC 0x19,1
+	RJMP _0xF
+; 0000 004A      return 5;
+	__GETD1N 0x40A00000
+	RJMP _0x2000001
+; 0000 004B      }
+; 0000 004C      else{
+_0xF:
+; 0000 004D      return f0;
 	CALL __GETD1S0
-; 0000 0046      }
-; 0000 0047 }
+; 0000 004E      }
+; 0000 004F }
 _0x2000001:
 	ADIW R28,4
 	RET
 ; .FEND
 
 	.CSEG
-;OPTIMIZER ADDED SUBROUTINE, CALLED 2 TIMES, CODE SIZE REDUCTION:5 WORDS
+;OPTIMIZER ADDED SUBROUTINE, CALLED 2 TIMES, CODE SIZE REDUCTION:1 WORDS
 SUBOPT_0x0:
+	__GETD2S 4
+	RJMP _buttons
+
+;OPTIMIZER ADDED SUBROUTINE, CALLED 2 TIMES, CODE SIZE REDUCTION:5 WORDS
+SUBOPT_0x1:
 	OUT  0x15,R30
-	CALL __GETD1S0
+	__GETD1S 4
 	CALL __CFD1U
 	MOVW R26,R30
 	JMP  _delay_ms
@@ -1459,6 +1483,13 @@ __PUTPARD2:
 	ST   -Y,R24
 	ST   -Y,R27
 	ST   -Y,R26
+	RET
+
+__CPD12:
+	CP   R30,R26
+	CPC  R31,R27
+	CPC  R22,R24
+	CPC  R23,R25
 	RET
 
 ;END OF CODE MARKER

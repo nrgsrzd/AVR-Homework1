@@ -12,7 +12,6 @@ Author  :
 Company : 
 Comments: 
 
-
 Chip type               : ATmega32
 Program type            : Application
 AVR Core Clock frequency: 1.000000 MHz
@@ -28,13 +27,18 @@ float buttons(float);
 void main(void)
 {
 float f = 0.01;
+float ftemp;
 DDRA = 0x00;
 PORTA = 0xFF;
 DDRC = 0xFF;
 PORTC = 0x00;
 
+f = buttons(f);
+
 while (1)
-      {
+      {                
+      
+      //start
       if(PINA.0==0){
           while(1){ 
           //100HZ
@@ -42,7 +46,11 @@ while (1)
               delay_ms(f);    
               PORTC = 0b00000001; 
               delay_ms(f);  
-              f = buttons(f);
+              ftemp = buttons(f);
+              if(ftemp != f){
+                f = ftemp;
+                break;
+              }
           } 
       }
 
@@ -51,19 +59,19 @@ while (1)
 float buttons(float f0){
     //250HZ
      if(PINA.2==0){
-     return 0.004;
+     return 2;
      }              
      //500Hz
      if(PINA.3==0){
-     return 0.002;
+     return 1;
      }     
      //1000Hz
      if(PINA.4==0){
-     return 0.001;
+     return 0.5;
      }   
      //100HZ
      if(PINA.1==0){
-     return 0.01;
+     return 5;
      }
      else{
      return f0;
