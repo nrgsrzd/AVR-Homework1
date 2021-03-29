@@ -1205,17 +1205,16 @@ __CLEAR_SRAM:
 	.CSEG
 _main:
 ; .FSTART _main
-; 0000 001D float f = 0.01;
+; 0000 001D float f=5;
 ; 0000 001E float ftemp;
 ; 0000 001F DDRA = 0x00;
 	SBIW R28,8
-	LDI  R30,LOW(10)
+	LDI  R30,LOW(0)
 	STD  Y+4,R30
-	LDI  R30,LOW(215)
 	STD  Y+5,R30
-	LDI  R30,LOW(35)
+	LDI  R30,LOW(160)
 	STD  Y+6,R30
-	LDI  R30,LOW(60)
+	LDI  R30,LOW(64)
 	STD  Y+7,R30
 ;	f -> Y+4
 ;	ftemp -> Y+0
@@ -1230,103 +1229,101 @@ _main:
 	LDI  R30,LOW(0)
 	OUT  0x15,R30
 ; 0000 0023 
-; 0000 0024 f = buttons(f);
+; 0000 0024 while (1)
+_0x3:
+; 0000 0025       {
+; 0000 0026       f = buttons(f);
 	RCALL SUBOPT_0x0
 	__PUTD1S 4
-; 0000 0025 
-; 0000 0026 while (1)
-_0x3:
-; 0000 0027       {
-; 0000 0028 
-; 0000 0029       //start
-; 0000 002A       if(PINA.0==0){
+; 0000 0027       //start
+; 0000 0028       if(PINA.0==0){
 	SBIC 0x19,0
 	RJMP _0x6
-; 0000 002B           while(1){
+; 0000 0029           while(1){
 _0x7:
-; 0000 002C           //100HZ
-; 0000 002D               PORTC = 0b00000000;
+; 0000 002A           //100HZ
+; 0000 002B               PORTC = 0b00000000;
 	LDI  R30,LOW(0)
 	RCALL SUBOPT_0x1
-; 0000 002E               delay_ms(f);
-; 0000 002F               PORTC = 0b00000001;
+; 0000 002C               delay_ms(f);
+; 0000 002D               PORTC = 0b00000001;
 	LDI  R30,LOW(1)
 	RCALL SUBOPT_0x1
-; 0000 0030               delay_ms(f);
-; 0000 0031               ftemp = buttons(f);
+; 0000 002E               delay_ms(f);
+; 0000 002F               ftemp = buttons(f);
 	RCALL SUBOPT_0x0
 	CALL __PUTD1S0
-; 0000 0032               if(ftemp != f){
+; 0000 0030               if(ftemp != f){
 	__GETD1S 4
 	CALL __GETD2S0
 	CALL __CPD12
 	BREQ _0xA
-; 0000 0033                 f = ftemp;
+; 0000 0031                 f = ftemp;
 	CALL __GETD1S0
 	__PUTD1S 4
-; 0000 0034                 break;
+; 0000 0032                 break;
 	RJMP _0x9
-; 0000 0035               }
-; 0000 0036           }
+; 0000 0033               }
+; 0000 0034           }
 _0xA:
 	RJMP _0x7
 _0x9:
+; 0000 0035       }
+; 0000 0036 
 ; 0000 0037       }
-; 0000 0038 
-; 0000 0039       }
 _0x6:
 	RJMP _0x3
-; 0000 003A }
+; 0000 0038 }
 _0xB:
 	RJMP _0xB
 ; .FEND
 ;float buttons(float f0){
-; 0000 003B float buttons(float f0){
+; 0000 0039 float buttons(float f0){
 _buttons:
 ; .FSTART _buttons
-; 0000 003C     //250HZ
-; 0000 003D      if(PINA.2==0){
+; 0000 003A     //250HZ
+; 0000 003B      if(PINA.2==0){
 	CALL __PUTPARD2
 ;	f0 -> Y+0
 	SBIC 0x19,2
 	RJMP _0xC
-; 0000 003E      return 2;
+; 0000 003C      return 2;
 	__GETD1N 0x40000000
 	RJMP _0x2000001
-; 0000 003F      }
-; 0000 0040      //500Hz
-; 0000 0041      if(PINA.3==0){
+; 0000 003D      }
+; 0000 003E      //500Hz
+; 0000 003F      else if(PINA.3==0){
 _0xC:
 	SBIC 0x19,3
-	RJMP _0xD
-; 0000 0042      return 1;
+	RJMP _0xE
+; 0000 0040      return 1;
 	__GETD1N 0x3F800000
 	RJMP _0x2000001
-; 0000 0043      }
-; 0000 0044      //1000Hz
-; 0000 0045      if(PINA.4==0){
-_0xD:
+; 0000 0041      }
+; 0000 0042      //1000Hz
+; 0000 0043      else if(PINA.4==0){
+_0xE:
 	SBIC 0x19,4
-	RJMP _0xE
-; 0000 0046      return 0.5;
+	RJMP _0x10
+; 0000 0044      return 0.5;
 	__GETD1N 0x3F000000
 	RJMP _0x2000001
-; 0000 0047      }
-; 0000 0048      //100HZ
-; 0000 0049      if(PINA.1==0){
-_0xE:
+; 0000 0045      }
+; 0000 0046      //100HZ
+; 0000 0047      else if(PINA.1==0){
+_0x10:
 	SBIC 0x19,1
-	RJMP _0xF
-; 0000 004A      return 5;
+	RJMP _0x12
+; 0000 0048      return 5;
 	__GETD1N 0x40A00000
 	RJMP _0x2000001
-; 0000 004B      }
-; 0000 004C      else{
-_0xF:
-; 0000 004D      return f0;
+; 0000 0049      }
+; 0000 004A      else{
+_0x12:
+; 0000 004B      return f0;
 	CALL __GETD1S0
-; 0000 004E      }
-; 0000 004F }
+; 0000 004C      }
+; 0000 004D }
 _0x2000001:
 	ADIW R28,4
 	RET

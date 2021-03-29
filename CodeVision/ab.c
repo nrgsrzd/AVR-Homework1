@@ -26,18 +26,16 @@ Data Stack size         : 512
 float buttons(float);
 void main(void)
 {
-float f = 0.01;
+float f=5;
 float ftemp;
 DDRA = 0x00;
 PORTA = 0xFF;
 DDRC = 0xFF;
 PORTC = 0x00;
 
-f = buttons(f);
-
 while (1)
       {                
-      
+      f = buttons(f);
       //start
       if(PINA.0==0){
           while(1){ 
@@ -62,15 +60,15 @@ float buttons(float f0){
      return 2;
      }              
      //500Hz
-     if(PINA.3==0){
+     else if(PINA.3==0){
      return 1;
      }     
      //1000Hz
-     if(PINA.4==0){
+     else if(PINA.4==0){
      return 0.5;
      }   
      //100HZ
-     if(PINA.1==0){
+     else if(PINA.1==0){
      return 5;
      }
      else{

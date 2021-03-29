@@ -13,5 +13,5 @@ Variable                                                                        
 FLASH Allocation [words]
 Function                                                                          Address   Size
 ------------------------------------------------------------------------------------------------
-main                                                                              0x00045     49
-buttons                                                                           0x00076     34
+main                                                                              0x00045     48
+buttons                                                                           0x00075     34
